@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f8fb" />
+    <title>Fyzirgo</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Contenu global -->
+    <main class="application" id="application">
+      <!-- En tete -->
+      <header class="entete" id="entete">
+        <button class="marque" type="button" data-view="accueil" aria-label="Retour accueil">
+          <span class="marque-ligne"><img src="assets/fyzirgo-logo.png" alt="Symbole Fyzirgo" /><strong>Fyzirgo</strong></span>
+          <small>Organiseur de tournées médicales à domicile</small>
+        </button>
+        <div class="outils-entete">
+          <div class="bloc-langue">
+            <button class="langue" type="button" data-action="ouvrir-langues" aria-label="Choisir une langue"><span class="code-langue">FR</span> <span class="chevron" aria-hidden="true">⌄</span></button>
+            <div class="menu-langue cache" id="menu-langue">
+              <button type="button" data-action="choisir-langue" data-langue="FR">Français</button>
+              <button type="button" data-action="choisir-langue" data-langue="EN">English</button>
+              <button type="button" data-action="choisir-langue" data-langue="ES">Español</button>
+            </div>
+          </div>
+          <button class="reglage-entete" type="button" data-view="reglages" aria-label="Ouvrir les réglages">⚙</button>
+        </div>
+      </header>
+
+      <!-- Accueil -->
+      <section class="vue active" id="vue-accueil" data-view-panel="accueil">
+        <div class="resume-accueil">
+          <div class="heure-accueil">
+            <p id="date-actuelle">08/10/2026</p>
+            <strong id="heure-actuelle">00:00</strong>
+          </div>
+          <button class="carte-prochain" type="button" id="ouvrir-prochain-patient" disabled>
+            <p>Prochain patient</p>
+            <strong id="prochain-patient">Pas de tournée active</strong>
+            <span id="heure-prochain-patient"></span>
+          </button>
+        </div>
+        <button class="tournee-active cache" type="button" id="ouvrir-tournee-active"></button>
+
+        <div class="actions-accueil">
+          <button class="tuile tuile-orange" type="button" data-view="nouveau-patient"><span>+</span>Ajouter patient</button>
+          <button class="tuile tuile-verte" type="button" data-view="patients"><span>♟</span>Liste patients</button>
+          <button class="tuile tuile-bleue" type="button" data-view="tournees"><span>↪</span>Planifier tournées</button>
+          <button class="tuile tuile-violette" type="button" data-view="planning"><span>▣</span>Planning</button>
+        </div>
+
+        <div class="titre-ligne">
+          <h2>Visites d'aujourd'hui</h2>
+          <span id="compteur-visites">0</span>
+        </div>
+        <div class="etat-vide" id="visites-jour">
+          <span aria-hidden="true">▣</span>
+          <p>Aucune visite planifiée</p>
+        </div>
+      </section>
+
+      <!-- Patients -->
+      <section class="vue" id="vue-patients" data-view-panel="patients">
+        <div class="titre-ligne">
+          <div>
+            <p class="sur-titre">Dossier patient</p>
+            <h1>Patients</h1>
+          </div>
+          <button class="bouton-icone" type="button" data-view="nouveau-patient" aria-label="Ajouter un patient">+</button>
+        </div>
+        <label class="recherche" for="recherche-patient">
+          <span aria-hidden="true">⌕</span>
+          <input id="recherche-patient" type="search" placeholder="Rechercher un patient" autocomplete="off" />
+        </label>
+        <div class="filtres">
+          <button class="filtre actif" type="button" data-filtre="tous">Tous</button>
+          <button class="filtre" type="button" data-filtre="aujourdhui">Aujourd'hui</button>
+          <span id="compteur-patients">0 patient</span>
+        </div>
+        <div class="liste" id="liste-patients"></div>
+      </section>
+
+      <!-- Formulaire patient -->
+      <section class="vue" id="vue-nouveau-patient" data-view-panel="nouveau-patient">
+        <div class="titre-ligne">
+          <div>
+            <p class="sur-titre">Dossier patient</p>
+            <h1 id="titre-formulaire-patient">Nouveau patient</h1>
+          </div>
+          <button class="bouton-secondaire" type="button" data-view="patients">Annuler</button>
+        </div>
+        <form id="form-patient" class="formulaire">
+          <div class="zone-photo">
+            <div class="apercu-photo" id="apercu-photo">
+              <img id="image-patient" alt="Photo du patient" class="cache" />
+              <span id="icone-photo" aria-hidden="true">⌾</span>
+            </div>
+            <div class="actions-photo">
+              <p class="etiquette">Photo patient</p>
+              <div>
+                <button class="bouton-contour violet" type="button" id="ouvrir-appareil-photo">Prendre une photo</button>
+                <button class="bouton-contour bleu" type="button" id="ouvrir-fichier-photo">Choisir un fichier</button>
+              </div>
+            </div>
+            <input id="photo-appareil" type="file" accept="image/*" capture="environment" class="cache" />
+            <input id="photo-fichier" type="file" accept="image/*" class="cache" />
+          </div>
+          <div class="identite-patient">
+            <label>Nom *<input name="nom" required maxlength="80" placeholder="Nom du patient" /></label>
+            <fieldset class="civilite"><legend>Civilité</legend><label><input type="radio" name="civilite" value="H" />H</label><label><input type="radio" name="civilite" value="F" />F</label></fieldset>
+          </div>
+          <div class="section-formulaire">
+            <div class="ligne-section"><p class="etiquette">Pathologies</p><span id="compteur-pathologies" class="compteur-limite">0/3</span></div>
+            <div class="ajout-pathologie"><input id="saisie-pathologie" list="catalogue-pathologies" maxlength="80" placeholder="Saisir ou choisir une pathologie" /><button class="bouton-ajout" type="button" data-action="ajouter-pathologie">+ Ajouter</button></div>
+            <datalist id="catalogue-pathologies"></datalist>
+            <div class="liste-pathologies" id="liste-pathologies"></div>
+          </div>
+          <label>Note générale<textarea name="notes" rows="4" maxlength="500" placeholder="Observations utiles"></textarea></label>
+          <div class="section-formulaire">
+            <div class="ligne-section">
+              <p class="etiquette">Contact urgence</p>
+              <button class="bouton-ajout" type="button" data-action="ajouter-contact-urgence">+ Ajouter</button>
+            </div>
+            <div class="contacts" id="contacts-urgence"></div>
+          </div>
+          <div class="section-formulaire">
+            <div class="ligne-section">
+              <p class="etiquette">Autres intervenants</p>
+              <button class="bouton-ajout" type="button" data-action="ajouter-intervenant">+ Ajouter</button>
+            </div>
+            <div class="contacts" id="contacts-intervenants"></div>
+          </div>
+          <label>Adresse postale *
+            <textarea name="adressePostale" rows="3" required placeholder="Rue, code postal, ville, complément"></textarea>
+          </label>
+          <button class="bouton-contour bleu" type="button" id="rechercher-adresse">Rechercher sur Google Maps</button>
+          <label>Adresse, coordonnées GPS ou lien Google Maps
+            <textarea name="localisation" id="localisation" rows="3" placeholder="Adresse, 48.8566, 2.3522 ou lien partagé Google Maps"></textarea>
+          </label>
+          <button class="bouton-contour vert" type="button" id="coller-lien-maps">Coller le lien</button>
+          <p class="aide" id="aide-localisation">Coller une adresse, des coordonnées ou un lien Google Maps.</p>
+          <div class="section-formulaire">
+            <p class="etiquette">Instruction vocale</p>
+            <button class="bouton-contour violet" type="button" id="enregistrer-voix">Micro · Enregistrer une note</button>
+            <button class="bouton-contour bleu" type="button" id="transcrire-voix">Transcrire en texte le message vocal</button>
+            <button class="bouton-principal vert" type="button" id="ecouter-voix">Aucune note sauvegardée</button>
+            <label>Texte transcrit<textarea name="transcription" id="transcription" rows="3" placeholder="Texte transcrit"></textarea></label>
+          </div>
+          <div class="deux-champs">
+            <label>Heure début<select name="heureDebut" id="heure-debut"></select></label>
+            <label>Heure fin<select name="heureFin" id="heure-fin"></select></label>
+          </div>
+          <fieldset>
+            <legend>Type de planning</legend>
+            <div class="choix-groupe">
+              <label><input type="radio" name="frequence" value="unique" checked />Unique</label>
+              <label><input type="radio" name="frequence" value="hebdomadaire" />Hebdomadaire</label>
+              <label><input type="radio" name="frequence" value="mensuel" />Mensuel</label>
+            </div>
+          </fieldset>
+          <div id="planning-unique"><label>Date de visite<input name="dateVisite" type="date" /></label></div>
+          <div id="planning-hebdomadaire" class="section-formulaire cache">
+            <p class="etiquette">Jours de passage</p><div class="jours-planning" id="jours-hebdomadaires"></div>
+            <div class="semaine-navigation"><button class="bouton-secondaire" type="button" data-action="semaine-precedente">‹</button><div><strong id="libelle-semaine"></strong><span id="dates-semaine"></span></div><button class="bouton-secondaire" type="button" data-action="semaine-suivante">›</button></div>
+            <label class="selection-semaine"><input id="selection-semaine" type="checkbox" />Ajouter cette semaine</label>
+            <div id="semaines-choisies" class="semaines-choisies"></div>
+          </div>
+          <div id="planning-mensuel" class="section-formulaire cache">
+            <p class="etiquette">Jours de passage</p><div class="jours-planning" id="jours-mensuels"></div>
+            <p class="etiquette">Mois concernés</p><div class="mois-planning" id="mois-mensuels"></div>
+          </div>
+          <button class="bouton-principal" type="submit" id="sauvegarder-patient">Enregistrer</button>
+        </form>
+      </section>
+
+      <!-- Fiche patient -->
+      <section class="vue" id="vue-fiche-patient" data-view-panel="fiche-patient">
+        <div class="titre-ligne">
+          <div>
+            <p class="sur-titre">Dossier patient</p>
+            <h1>Fiche patient</h1>
+          </div>
+          <button class="bouton-secondaire" type="button" data-view="patients">Retour</button>
+        </div>
+        <div id="contenu-fiche-patient"></div>
+        <button class="bouton-principal" type="button" id="editer-fiche-patient">Éditer la fiche</button>
+      </section>
+
+      <!-- Tournees -->
+      <section class="vue" id="vue-tournees" data-view-panel="tournees">
+        <div class="titre-ligne">
+          <div>
+            <p class="sur-titre">Organisation</p>
+            <h1>Tournées</h1>
+          </div>
+        </div>
+        <div class="onglets-tournees" role="tablist" aria-label="Gestion des tournées">
+          <button class="actif" type="button" data-action="afficher-liste-tournees" data-onglet-tournees="liste" role="tab" aria-selected="true">Liste des tournées</button>
+          <button type="button" data-action="nouvelle-tournee" data-onglet-tournees="creation" role="tab" aria-selected="false">Créer</button>
+        </div>
+        <div id="form-tournee" class="formulaire cache">
+          <label>Nom de la tournée<input id="nom-tournee" maxlength="60" placeholder="Exemple : Tournée du matin" /></label>
+          <label>Date<input id="date-tournee" type="date" /></label>
+          <p class="etiquette">Sélectionner les patients</p>
+          <div id="selection-tournee" class="liste selection"></div>
+          <button class="bouton-principal bleu" type="button" data-action="enregistrer-tournee">Créer la tournée</button>
+          <button class="bouton-secondaire" type="button" data-action="annuler-tournee">Annuler</button>
+        </div>
+        <div class="liste" id="liste-tournees"></div>
+      </section>
+
+      <!-- Planning -->
+      <section class="vue" id="vue-planning" data-view-panel="planning">
+        <div class="titre-ligne">
+          <div>
+            <p class="sur-titre">Organisation</p>
+            <h1>Planning</h1>
+          </div>
+        </div>
+        <div id="liste-planning" class="planning"></div>
+      </section>
+
+      <!-- Reglages -->
+      <section class="vue" id="vue-reglages" data-view-panel="reglages">
+        <div class="titre-ligne">
+          <div>
+            <p class="sur-titre">Compte et données</p>
+            <h1>Réglages</h1>
+          </div>
+        </div>
+        <article class="carte-reglage">
+          <h2>Langue</h2>
+          <div class="choix-groupe langues">
+            <button class="actif" type="button">Français</button>
+            <button type="button">English</button>
+            <button type="button">Español</button>
+          </div>
+        </article>
+        <article class="carte-don">
+          <div>
+            <p class="sur-titre">Soutien</p>
+            <h2>Faire un don</h2>
+            <p>Paiement par carte avec Stripe.</p>
+          </div>
+          <button class="bouton-principal" id="ouvrir-don" type="button">Faire un don</button>
+        </article>
+        <article class="carte-reglage">
+          <h2>Profil</h2>
+          <label class="choix-select">Rôle
+            <select id="role-utilisateur"><option value="Titulaire">Titulaire</option><option value="Remplacant">Remplaçant</option></select>
+          </label>
+          <button class="bouton-contour bleu" type="button" data-view="compte">Créer ou ouvrir un compte</button>
+        </article>
+        <article class="carte-reglage">
+          <h2>Transmissions</h2>
+          <p>Préparer ou recevoir des fiches patients et des tournées.</p>
+          <div class="actions-colonne">
+            <button class="bouton-contour bleu" type="button" data-view="transmission">Préparer une transmission</button>
+            <button class="bouton-contour vert" type="button" data-view="transmission">Recevoir une transmission</button>
+          </div>
+        </article>
+        <article class="carte-reglage">
+          <h2>Données</h2>
+          <div class="actions-colonne">
+            <button class="bouton-contour bleu" type="button" id="exporter-donnees">Exporter les données test</button>
+            <label class="bouton-contour vert import-label">Importer un fichier<input type="file" id="importer-donnees" accept="application/json" /></label>
+          </div>
+        </article>
+        <article class="carte-reglage responsabilite">
+          <h2>Données sur cet appareil</h2>
+          <p>Les données enregistrées sont conservées localement sur cet appareil.</p>
+        </article>
+      </section>
+
+      <!-- Compte -->
+      <section class="vue" id="vue-compte" data-view-panel="compte">
+        <div class="titre-ligne">
+          <div>
+            <p class="sur-titre">Accès</p>
+            <h1>Compte utilisateur</h1>
+          </div>
+          <button class="bouton-secondaire" type="button" data-view="reglages">Retour</button>
+        </div>
+        <div class="compte-grille">
+          <form class="formulaire carte-formulaire" id="form-creation-compte">
+            <h2>Créer un compte</h2>
+            <label>Nom<input name="nom" required maxlength="80" placeholder="Nom affiché" /></label>
+            <label>Adresse e-mail<input name="email" type="email" required placeholder="nom@exemple.fr" /></label>
+            <label>Mot de passe<input name="motDePasse" type="password" required minlength="8" placeholder="8 caractères minimum" /></label>
+            <label>Rôle<select name="role"><option value="Titulaire">Titulaire</option><option value="Remplacant">Remplaçant</option></select></label>
+            <button class="bouton-principal" type="submit">Créer le compte</button>
+          </form>
+          <form class="formulaire carte-formulaire" id="form-connexion-compte">
+            <h2>Ouvrir le profil</h2>
+            <label>Adresse e-mail<input name="email" type="email" required placeholder="nom@exemple.fr" /></label>
+            <label>Mot de passe<input name="motDePasse" type="password" required placeholder="Mot de passe" /></label>
+            <button class="bouton-principal bleu" type="submit">Se connecter</button>
+            <p class="aide" id="etat-compte">Profil non ouvert.</p>
+          </form>
+        </div>
+      </section>
+
+      <!-- Transmissions -->
+      <section class="vue" id="vue-transmission" data-view-panel="transmission">
+        <div class="titre-ligne">
+          <div>
+            <p class="sur-titre">Transmission</p>
+            <h1>Échange de dossiers</h1>
+          </div>
+          <button class="bouton-secondaire" type="button" data-view="reglages">Retour</button>
+        </div>
+        <article class="carte-transmission">
+          <span class="pastille bleu">1</span>
+          <h2>Préparer</h2>
+          <p>Choisir une fiche patient ou une tournée à transmettre.</p>
+          <button class="bouton-principal bleu" type="button" disabled>Créer le fichier</button>
+        </article>
+        <article class="carte-transmission">
+          <span class="pastille verte">2</span>
+          <h2>Recevoir</h2>
+          <p>Importer un fichier reçu sur le téléphone.</p>
+          <button class="bouton-principal vert" type="button" disabled>Importer le fichier</button>
+        </article>
+        <article class="notification-demo">
+          <strong>Notification</strong>
+          <p>Une transmission reçue apparaîtra ici.</p>
+        </article>
+      </section>
+    </main>
+
+    <!-- Pied de page -->
+    <nav class="navigation" aria-label="Navigation principale">
+      <button class="actif" type="button" data-view="accueil"><span>⌂</span>Accueil</button>
+      <button type="button" data-view="patients"><span>♟</span>Patients</button>
+      <button type="button" data-view="tournees"><span>↪</span>Tournées</button>
+      <button type="button" data-view="planning"><span>▣</span>Planning</button>
+      <button type="button" data-view="transmission"><span>⇄</span>Échanges</button>
+    </nav>
+    <!-- Don fictif -->
+    <div class="modale cache" id="modale-don" role="dialog" aria-modal="true" aria-labelledby="titre-don">
+      <div class="fond-modale" data-action="fermer-don"></div>
+      <section class="boite-modale" id="etape-montant-don">
+        <p class="sur-titre">Stripe</p>
+        <h2 id="titre-don">Choisir un montant</h2>
+        <div class="choix-groupe montants-don" id="montants-don">
+          <button class="actif" type="button" data-montant="5">5 €</button>
+          <button type="button" data-montant="10">10 €</button>
+          <button type="button" data-montant="20">20 €</button>
+        </div>
+        <div class="actions-modale">
+          <button class="bouton-secondaire" type="button" data-action="fermer-don">Annuler</button>
+          <button class="bouton-principal" id="confirmer-don" type="button">Continuer avec Stripe</button>
+        </div>
+      </section>
+      <section class="boite-modale cache" id="etape-paiement-don">
+        <p class="sur-titre">Stripe</p>
+        <h2>Paiement de <span id="montant-paiement">5 €</span></h2>
+        <div class="carte-stripe">
+          <label>Numéro de carte<input value="4242 4242 4242 4242" readonly /></label>
+          <div class="deux-champs">
+            <label>Expiration<input value="12/34" readonly /></label>
+            <label>CVC<input value="123" readonly /></label>
+          </div>
+        </div>
+        <p class="aide">Démonstration uniquement. Ne pas saisir de données bancaires.</p>
+        <div class="actions-modale">
+          <button class="bouton-secondaire" id="retour-don" type="button">Retour</button>
+          <button class="bouton-principal" id="simuler-don" type="button">Payer</button>
+        </div>
+      </section>
+    </div>
+    <div class="message" id="message" role="status" aria-live="polite"></div>
+    <div class="modale cache" id="modale-confirmation" role="dialog" aria-modal="true" aria-labelledby="titre-confirmation">
+      <div class="fond-modale" data-action="fermer-confirmation"></div>
+      <section class="boite-modale">
+        <h2 id="titre-confirmation">Enregistrer la fiche</h2>
+        <p id="texte-confirmation">Confirmer la sauvegarde de cette fiche patient.</p>
+        <div class="actions-modale">
+          <button class="bouton-secondaire" type="button" data-action="fermer-confirmation">Annuler</button>
+          <button class="bouton-principal" type="button" id="confirmer-sauvegarde">Enregistrer</button>
+        </div>
+      </section>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

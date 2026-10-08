@@ -1,0 +1,17 @@
+{
+  "name": "Fyzirgo",
+  "short_name": "Fyzirgo",
+  "description": "Organiseur de tournées médicales à domicile",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f8fb",
+  "theme_color": "#17182b",
+  "icons": [
+    {
+      "src": "assets/fyzirgo-logo.png",
+      "sizes": "2000x2000",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
